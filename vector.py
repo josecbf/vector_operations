@@ -1,6 +1,15 @@
-from math import sqrt
+# -*- coding: utf-8 -*-
+"""
+Created on Sat Nov  4 14:28:58 2017
+
+@author: josec
+"""
+from math import sqrt, acos, pi
 
 class Vector(object):
+    
+    CANNOT_NORMALIZE_A_ZERO_VECTOR_MSG = 'Cannot normalize a vero vector'
+    
     def __init__(self, coordinates):
         try:
             if not coordinates:
@@ -20,10 +29,10 @@ class Vector(object):
     
     def normalized(self):
         try:
-            magnitude = self.magnitude()
-            return self.times_scalar(1./magnitude)
+            magnitude = self.magnitude()            
+            return self.times_scalar(1.0/magnitude)
         except ZeroDivisionError:
-            raise Exception('Cannot normalize a zero vector')
+            raise Exception(self.CANNOT_NORMALIZE_A_ZERO_VECTOR_MSG)
             
     def plus(self, v):
         new_coordinates = [x+y for x,y in zip(self.coordinates, v.coordinates)]
@@ -36,6 +45,57 @@ class Vector(object):
     def times_scalar(self, c):
         new_coordinates = [c*x for x in self.coordinates]
         return Vector(new_coordinates)
+    
+    def dotProduct(self, v):
+        new_coordinates = [x*y for x,y in zip(self.coordinates, v.coordinates)]
+        return sum(new_coordinates)
+    
+    def angle(self, v, degrees=False):
+        try:
+            u1 = self.normalized()
+            u2 = v.normalized()
+            angle_radians = acos(u1.dotProduct(u2))
+            
+            if (degrees):
+                return angle_radians * (180./pi)
+            else:
+                return angle_radians
+        
+        except Exception as e:
+            if (str(e) == self.CANNOT_NORMALIZE_A_ZERO_VECTOR_MSG):
+                raise Exception('Cannot compute an angle with a zero vector')
+            else:
+                raise e
+    
+    def is_zero_vector(self, tolerance = 1e-10):
+        return self.magnitude() < tolerance
+                
+    def is_ortogonal_to(self, v, tolerance = 1e-10):
+        return abs(self.dotProduct(v)) < tolerance
+    
+    def is_parallel_to(self, v):
+        return (self.is_zero_vector() or v.is_zero_vector() or self.angle(v) == 0 or self.angle(v) == pi)
+    
+    def component_orthogonal_to(self, basis):
+        try:
+            projection = self.component_parallel_to(basis)
+            return self.minus(projection)
+        except Exception as e:
+            if (str(e) == self.NO_UNIQUE_PARALLEL_COMPONENT_MSG):
+                raise Exception(self.NO_UNIQUE_ORTHOGONAL_COMPONENT_MSG)
+            else:
+                raise e
+                
+    def component_parallel_to(self, basis):
+        try:
+            u = basis.normalized()
+            weight = self.dotProduct(u)
+            return u.times_scalar(weight)
+        except Exception as e:
+            if (str(e) == self.CANNOT_NORMALIZE_A_ZERO_VECTOR_MSG):
+                raise Exception(self.NO_UNIQUE_PARALLEL_COMPONENT_MSG)
+            else:
+                raise e
 
     def __str__(self):
         return 'Vector: {}'.format(self.coordinates)
@@ -86,6 +146,40 @@ print (v.magnitude())
 # Normalization - Function normalized
 v = Vector([10, 30])
 print (v.normalized())
+
+# Dot Product - Function dotProduct
+v = Vector([-5.955, -4.904, -1.874])
+w = Vector([-4.496, -8.755, 7.103])
+print (v.dotProduct(w))
+
+# Angle - Function angle
+# default return in radians, if the return are wanted in degrees add True
+v = Vector([1, 2])
+w = Vector([3, 4])
+print (v.angle(w, True))
+
+# Ortogonal - Function is_ortogonal_to
+# tolerance is 1e-10 for default
+v = Vector([1, 2])
+w = Vector([3, 4])
+print (v.is_ortogonal_to(w))
+
+# Parallel - Function is_parallel_to
+v = Vector([1, 2])
+w = Vector([3, 4])
+print (v.is_parallel_to(w))
+
+# Parallel Component
+v = Vector([1, 2])
+w = Vector([3, 4])
+print (v.component_parallel_to(w))
+
+# Orthogonal Component
+v = Vector([1, 2])
+w = Vector([3, 4])
+print (v.component_orthogonal_to(w))
+
+
 
 
 
