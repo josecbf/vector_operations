@@ -19,8 +19,11 @@ class Vector(object):
         return sqrt(sum(squared_coordinates))
     
     def normalized(self):
-        magnitude = self.magnitude()
-        return self.times_scalar(1./magnitude)
+        try:
+            magnitude = self.magnitude()
+            return self.times_scalar(1./magnitude)
+        except ZeroDivisionError:
+            raise Exception('Cannot normalize a zero vector')
             
     def plus(self, v):
         new_coordinates = [x+y for x,y in zip(self.coordinates, v.coordinates)]
