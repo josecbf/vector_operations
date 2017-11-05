@@ -96,6 +96,21 @@ class Vector(object):
                 raise Exception(self.NO_UNIQUE_PARALLEL_COMPONENT_MSG)
             else:
                 raise e
+                
+    def cross(self, v):
+        try:
+            x1, y1, z1 = self.coordinates
+            x2, y2, z2 = v.coordinates
+            new_coordinates = [x1*z2 - y2*z1, -(x1*z2 - x2*z1), x1*y2 - x2*y1]
+            return Vector(new_coordinates)
+        except ValueError as e:
+            msg = str(e)
+            if (msg == 'need more than 2 values to unpack'):
+                self_embedded_in_R3 = Vector(self.coordinates + ('0',))
+                v_embedded_in_R3 = Vector(v.coordinates + ('0',))
+                return self_embedded_in_R3.cross(v_embedded_in_R3)
+            else:
+                raise e
 
     def __str__(self):
         return 'Vector: {}'.format(self.coordinates)
@@ -178,6 +193,13 @@ print (v.component_parallel_to(w))
 v = Vector([1, 2])
 w = Vector([3, 4])
 print (v.component_orthogonal_to(w))
+
+# Cross Product
+v = Vector([1, 2, 3])
+w = Vector([4, 5, 6])
+print (v.cross(w))
+
+
 
 
 
