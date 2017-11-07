@@ -54,7 +54,12 @@ class Vector(object):
         try:
             u1 = self.normalized()
             u2 = v.normalized()
-            angle_radians = acos(u1.dotProduct(u2))
+            internProduct = u1.dotProduct(u2)
+            if (internProduct > 1):
+              internProduct = 1;
+            elif (internProduct < -1):
+              internProduct = -1
+            angle_radians = acos(internProduct)
             
             if (degrees):
                 return angle_radians * (180./pi)
